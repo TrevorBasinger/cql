@@ -478,8 +478,9 @@ putNative _ (CqlInet x)      = case x of
         putWord32host d
 putNative _ (CqlVarInt x)    = integer2bytes x
 putNative _ (CqlDecimal x)   = do
-    put (fromIntegral (decimalPlaces x) :: Int32)
-    integer2bytes (decimalMantissa x)
+    putWord32be (fromIntegral (decimalPlaces x))
+    encodeInt (fromIntegral $ decimalMantissa x)
+
 putNative V3 (CqlUdt  x)     = putByteString $ runPut (mapM_ (putValue V3 . snd) x)
 putNative V2 v@(CqlUdt  _)   = fail $ "putNative: udt: " ++ show v
 putNative _ v@(CqlList  _)   = fail $ "putNative: collection type: " ++ show v
